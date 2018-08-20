@@ -1,0 +1,67 @@
+# Cache and logs (Symfony2)
+/app/cache/*
+/app/logs/*
+!app/cache/.gitkeep
+!app/logs/.gitkeep
+
+# Email spool folder
+/app/spool/*
+
+# IDE files
+.vscode/
+
+# Cache, session files and logs (Symfony3)
+/var/cache/*
+/var/logs/*
+/var/sessions/*
+/var/application_logger/*
+/var/classes/*
+/var/config/*
+/var/email/*
+/var/installer
+/var/tmp
+/var/versions
+/var/recyclebin/*
+!var/cache/.gitkeep
+!var/logs/.gitkeep
+!var/sessions/.gitkeep
+
+# Developer documentation
+/doc
+
+# Tests folder
+/tests
+
+# Managed by Composer
+/app/bootstrap.php.cache
+/var/bootstrap.php.cache
+/bin/*
+!bin/console
+!bin/install
+!bin/symfony_requirements
+/vendor/*
+/tmp_var
+/assets_upload
+
+
+# Assets and user uploads
+/web/bundles/
+/web/uploads/
+#/web/var/assets - Assets can be stage then rsync merged
+/web/var/tmp
+/web/tmp_var
+#/web/static - Static files can stagged and the rsync merged
+!web/var/.gitkeep
+
+# PHPUnit
+/app/phpunit.xml
+/phpunit.xml
+
+# Build data
+/build
+/_www
+/setup
+
+
+# Backup entities generated with doctrine:generate:entities command
+**/Entity/*~

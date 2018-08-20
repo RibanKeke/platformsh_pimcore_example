@@ -1,0 +1,88 @@
+name: pimcore
+type: php:7.2
+
+relationships:
+  database: "pimcore_mysqldb:pimcore_admin"
+
+build:
+  flavor: "none"
+
+runtime:
+  extensions:
+    - bz2
+    - iconv
+    - dom
+    - simplexml
+    - exif
+    - intl
+    - opcache
+    - imagick
+
+variables:
+  env:
+    PIMCORE_INSTALL_ADMIN_USERNAME: "admin"
+    PIMCORE_INSTALL_ADMIN_PASSWORD: "admin"
+
+mounts:
+    "/var": "shared:files/var"
+    "/web/var": "shared:files/web-var"
+    "/web/bundles": "shared:files/web-bundles"
+ 
+web:
+  locations:
+    '/':
+      root: web
+      passthru: "/app.php"
+      allow: true
+      rules:
+        ^/videos/(?<resource>.*)$:
+          passthru: "/var/assets/videos/$resource"
+        ^/img/(?<resource>.*)$:
+          passthru: "/var/assets/img/$resource"
+        ^/static/(?<resource>.*)$:
+          passthru: "/web/static/$resource"
+
+disk: 2048
+
+hooks:
+  build: |
+    composer install --no-ansi --no-progress --prefer-dist  --no-scripts
+    if [ -d var ];then
+      if [ ! -d tmp_var ];then
+        mkdir tmp_var
+      fi
+      rsync -r var/ tmp_var/
+    fi
+    if [ -d web/var ];then
+      if [ ! -d web/tmp_var ];then
+        mkdir -p web/tmp_var
+      fi
+      rsync -r web/var/ web/tmp_var/
+    fi
+    if [ -d web/bundles ];then
+      if [ ! -d web/tmp_bundles ];then
+        mkdir -p web/tmp_bundles
+      fi
+      rsync -r web/bundles/ web/tmp_bundles/
+    fi
+  deploy: |
+    set -e
+    if [ -d tmp_var ];then
+      rsync -r tmp_var/ var/
+    fi
+    if [ -d web/tmp_var ];then
+      rsync -r web/tmp_var/ web/var/
+    fi
+    if [ -d web/tmp_bundles ];then
+      rsync -r web/tmp_bundles/ web/bundles/
+    fi
+    if [ ! -f web/var/.platform.installed ]; then
+        bin/console doctrine:query:sql "ALTER DATABASE  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        touch web/var/.platform.installed
+    fi
+    vendor/bin/pimcore-install --no-interaction --ignore-existing-config --no-debug
+
+crons:
+    pimcore_cron:
+        spec: "*/5 * * * *"
+        cmd: "bin/console maintenance"

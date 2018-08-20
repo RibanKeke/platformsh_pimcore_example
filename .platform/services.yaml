@@ -1,0 +1,11 @@
+pimcore_mysqldb:
+  type: mysql:10.0
+  disk: 2048
+  configuration:
+    schemas:
+      - project_database
+    endpoints:
+      pimcore_admin:
+        default_schema: project_database
+        privileges:
+          project_database: admin
